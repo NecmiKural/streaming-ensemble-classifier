@@ -1,6 +1,6 @@
 # Ensemble Classifier for Data Streams
 
-Coursework for **COMPX523-26A — Machine Learning for Data Streams**
+Coursework for **COMPX523-26A: Machine Learning for Data Streams**
 (University of Waikato). Builds an online ensemble classifier that
 learns continuously from a non-stationary stream with class imbalance
 and concept drift, under a hard 250 KB memory budget.
@@ -38,15 +38,15 @@ Two classifiers, both built on [CapyMOA][capymoa] (Python bindings for
 
 Shared scaffolding:
 
-- **Online Bagging** &mdash; per incoming instance, each base learner
+- **Online Bagging:** per incoming instance, each base learner
   receives weight `k ~ Poisson(λ)` and is trained `k` times. Bagging
   weights are drawn vectorised in NumPy.
-- **ADWIN drift detection** &mdash; one detector per ensemble member,
+- **ADWIN drift detection:** one detector per ensemble member,
   fed the 0/1 error stream. On `detected_change()` the member's base
   learner is re-initialised. The champion uses an `_ADWINNoHistory`
   subclass that skips the unbounded `MOADriftDetector.data` bookkeeping
   list.
-- **Leveraged Bagging** &mdash; a label ring buffer (numpy `int8`)
+- **Leveraged Bagging:** a label ring buffer (numpy `int8`)
   estimates the live class distribution. When the incoming instance is
   minority-side of a threshold, λ scales proportionally to the
   imbalance ratio (capped) so the minority is oversampled in the bagging
@@ -109,7 +109,7 @@ HoeffdingAdaptiveTree(n=10) reference classifier landed 0.88 TScore at
 ## Run
 
 ```bash
-cd assignment_2
+cd streaming-ensemble-classifier
 python3 -m venv .venv
 source .venv/bin/activate
 pip install capymoa pympler numpy scipy
