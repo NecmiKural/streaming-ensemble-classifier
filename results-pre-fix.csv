@@ -1,0 +1,7 @@
+classifier,instances,accuracy,balanced_accuracy,macro_f1,kappa,tournament_score,time_seconds,memory_kb
+NaiveBayes (baseline),37440,0.218563,0.499469,0.180677,-0.000463,0.340073,1.98,0.0
+EnsembleClassifier (n=10),37440,0.465839,0.621483,0.462767,0.134077,0.542125,26.77,63.6
+ChampionClassifier (n=100),37440,0.919925,0.883183,0.882573,0.765145,0.882878,77.11,156.3
+NaiveBayes (synthetic),100000,0.623190,0.611517,0.605912,0.227498,0.608714,1.35,0.0
+EnsembleClassifier (synthetic),100000,0.842260,0.840298,0.841060,0.682210,0.840679,52.43,0.0
+ChampionClassifier (synthetic),100000,0.964100,0.964396,0.963955,0.927914,0.964176,186.10,156.1

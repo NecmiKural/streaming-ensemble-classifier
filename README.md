@@ -11,7 +11,7 @@ and concept drift, under a hard 250 KB memory budget.
 
 ## Problem
 
-The stream is the instructor's synthetic [RBF generator][rbf] mixture
+The stream is the instructor's synthetic RBF generator mixture
 configured to mimic one year of sensor data:
 
 | Feature | Value |
@@ -86,6 +86,16 @@ ignored and trees grow to whatever the data triggers.
 This revision passes `memory_estimate_period=1000`, which makes
 enforcement effectively continuous at negligible runtime cost.
 
+### Bug 3: without MOA's size agent, nothing is enforced
+
+Found while re-running this revision in October 2026. MOA's
+`measureByteSize()` relies on its `SizeOfAgent` Java agent. When the JVM
+starts without it, the call returns 0, so each tree believes it is empty,
+`max_byte_size` is never enforced, and `measure_java_byte_size()` reports
+nothing. Run with the agent loaded: `make_sizeof_agent.py` builds a small
+agent jar from CapyMOA's own `moa.jar`, and `run_evaluation.py` now warns
+when MOA measures 0 bytes.
+
 ### How the fix looks
 
 ```python
@@ -106,6 +116,17 @@ trees plus ≈ 30 KB ADWIN/overhead. The instructor's own
 HoeffdingAdaptiveTree(n=10) reference classifier landed 0.88 TScore at
 112 KB total, which validates the regime.
 
+## Results after the fix
+
+On the synthetic RBF stream (100,000 instances, 4 drifts) with MOA's size agent loaded, the fixed champion (n=25, 8 KB per tree, memory_estimate_period=1000) reaches a tournament score of 0.9048, with its trees measured at 204.8 KB on the Java side and about 234 KB in total, under the 250 KB budget.
+
+The instructor's sample stream is course material and was not available for
+this re-run, so `results.csv` holds the synthetic rows only.
+`results-pre-fix.csv` keeps the submitted configuration's results (n=100,
+2 KB per tree, no effective enforcement), which broke the memory limit; its
+higher scores came from trees that were never capped. A run without the size
+agent shows the same effect: the cap is silently ignored and the score rises.
+
 ## Run
 
 ```bash
@@ -115,6 +136,8 @@ source .venv/bin/activate
 pip install capymoa pympler numpy scipy
 
 export JAVA_HOME=/path/to/openjdk-17  # CapyMOA 0.13 needs Java 17
+python3 make_sizeof_agent.py           # lets MOA measure, and so cap, tree size
+export JAVA_TOOL_OPTIONS="-javaagent:$PWD/sizeof-agent.jar"
 python3 run_evaluation.py
 ```
 
@@ -134,7 +157,9 @@ streaming-ensemble-classifier/
 ├── ht_experiment.py         ← Hoeffding Tree experiments
 ├── run_evaluation.py        ← prequential evaluation harness
 ├── quick_test.py            ← fast smoke test
-└── results.csv              ← tournament-format results
+├── make_sizeof_agent.py     ← builds MOA's size agent jar (see Bug 3)
+├── results.csv              ← results of this revision (synthetic stream)
+└── results-pre-fix.csv      ← results of the submitted, over-limit configuration
 ```
 
 > **Data not included.** The instructor-released sample stream
@@ -151,15 +176,18 @@ streaming-ensemble-classifier/
   long enough (`>> memory_estimate_period`) to trigger the enforcement
   pass. If you can't observe enforcement firing, you're not measuring
   what you think you are.
-- Take "the other guy got disqualified for 2 MB" warnings literally.
-  Champion #3a in the instructor's slide deck was disqualified for
-  exactly the failure mode this submission walked into.
+- Check that the measurement itself works: a size of 0 bytes is a
+  missing agent, not a small model.
+
+## License
+
+MIT (see `LICENSE`). The course data is not included and is not covered by
+the licence.
 
 ## Stack
 
 CapyMOA 0.13 (Python 3.13, JPype, OpenJDK 17), MOA (Java), NumPy,
 SciPy, Pympler.
 
-[rbf]: https://en.wikipedia.org/wiki/Radial_basis_function_network
 [capymoa]: https://capymoa.org/
 [moa]: https://moa.cms.waikato.ac.nz/

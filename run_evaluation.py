@@ -301,6 +301,9 @@ def measure_memory(obj, name="Object"):
             java_size = obj.measure_java_byte_size()
         except Exception as exc:  # noqa: BLE001
             print(f"  (Java byte-size probe failed: {exc})")
+        if java_size == 0:
+            print("  WARNING: MOA measured 0 bytes, so its SizeOfAgent is not loaded and"
+                  " max_byte_size is not enforced. See make_sizeof_agent.py.")
 
     total_effective = max(pympler_size, java_size + 30_000)  # +30 KB Python+ADWIN overhead
 
@@ -374,7 +377,7 @@ def write_results_csv(results_list, output_path):
 
 def main():
     print("=" * 60)
-    print("COMPX523-26A Assignment 2 — Full Evaluation")
+    print("COMPX523-26A Assignment 2: Full Evaluation")
     print("=" * 60)
 
     all_results = []
