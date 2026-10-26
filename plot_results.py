@@ -28,7 +28,7 @@ bars = [
 fig, ax = plt.subplots(figsize=(8, 3.4))
 ys = range(len(bars))[::-1]
 drawn = ax.barh(list(ys), [b[1] for b in bars], color=[b[2] for b in bars], height=0.6)
-ax.bar_label(drawn, fmt="%.3f", fontsize=9, padding=3)
+ax.bar_label(drawn, fmt="%.4f", fontsize=9, padding=3)
 ax.set_yticks(list(ys), [b[0] for b in bars], fontsize=9)
 ax.set_xlim(0, 1.08)
 ax.set_xlabel("Tournament score (synthetic RBF stream, 100,000 instances)")
